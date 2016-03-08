@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        
+        <title>medReach</title>
+        <meta name="description" content="GAE Demo Updated" />
+        <meta name="twitter:card" content="photo" />
+        <meta name="twitter:site" content="@BootstrapZero" />
+        <meta name="google-site-verification" content="3YZMYT6XcVJlav0ZKb7MQrzjnRGApJS8FOsrG4fPrXo" />
+        <link rel="author" href="">
+        <link rel="publisher" href="">
+<!--
+        <link href="/stylesheets/brackets.io.css" rel="stylesheet">
+        <link rel="stylesheet" href="/stylesheets/normalize.css">
+        <link rel="stylesheet" href="/stylesheets/foundation.min.css">
+        <link rel="stylesheet" href="/stylesheets/toastr.min.css" />
+-->
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,500,300,700' rel='stylesheet' type='text/css'>
+        
+        <!--[if lt IE 9]>
+          <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+        
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script>
+        $(document).ready(function(){
+            $("#upload_link").on('click', function(e){
+                e.preventDefault();
+                $("#upload:hidden").trigger('click');
+            });
+        });
+        </script>
+<style>
+    #upload{
+    display:none
+}
+        </style>
+ 
+    </head>
+    <body>
+    
+    <div id="wrap">
+    
+    <header class="navbar navbar-bright navbar-fixed-top" role="banner" data-spy="affix" data-offset-top="80">
+      <div class="container">
+        <div class="navbar-header">
+<!--
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+-->
+          <a class="navbar-brand" id="brand" href="/" title="">med<span style="color:#f9f9f9;font-weight:200;">Reach</span></a>
+        </div>
+        <nav class="collapse navbar-collapse" role="navigation" id="navbar">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/" rel="nofollow">Home</a></li>
+                <li><a href="" rel="nofollow" target="ext">My medReach</a></li>
+                <li><a href="/about" rel="nofollow" >About</a></li>
+                <li><a id="btnAbout" href="{{ url|safe }}">{{ url_linktext }}</a></li>
+            </ul>
+        </nav>
+      </div>
+    </header>
+        
+    <div style="min-height: 50px;">
+    </div>
+
+        
+    <div><br></div>
+    <div class="container" >
+        <div class="col-md-8">
+            <div>
+            {% if user and user.user_id() %}
+                <h2><a>{{ user.nickname() }}</a></h2>
+                <br>
+                <div>
+                    <form action="/upload_avatar"  enctype="multipart/form-data" method="post">
+                        <input class="btn btn-secondary-outline" id="upload" type="file" name="img"/><a href="" id="upload_link"><h3>Select a Photo to Upload</h3></a>
+                        <input class="btn btn-secondary-outline" type="submit" id="upload_link" value="Upload">
+                    </form>
+                </div>
+                
+                <hr class="line-break">
+                <div>
+                    <h3>People have agreed with you {{ mrUser.upvotes }} times</h3>
+                </div>
+                
+                <hr class="line-break">
+                <div>
+                    <h3>People have disagreed with you {{ mrUser.downvotes }} times</h3>
+                </div>
+                
+                <hr class="line-break">
+                <div>
+                    <h3>You have written {{ mrUser.num_comments }} comments</h3>
+                </div>
+            {% else %}
+                <h2>Welcome to medReach</h2>
+                <p>Please login to access your account settings.</p>
+            {% endif %}
+            </div>
+          
+        <div>
+        </div>
+            
+        </div>
+    </div>
+        
+  </body>
+</html>
+{% endautoescape %}

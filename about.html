@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        
+        <title>medReach</title>
+        <meta name="description" content="GAE Demo Updated" />
+        <meta name="twitter:card" content="photo" />
+        <meta name="twitter:site" content="@BootstrapZero" />
+        <meta name="google-site-verification" content="3YZMYT6XcVJlav0ZKb7MQrzjnRGApJS8FOsrG4fPrXo" />
+        <link rel="author" href="">
+        <link rel="publisher" href="">
+<!--
+        <link href="/stylesheets/brackets.io.css" rel="stylesheet">
+        <link rel="stylesheet" href="/stylesheets/normalize.css">
+        <link rel="stylesheet" href="/stylesheets/foundation.min.css">
+        <link rel="stylesheet" href="/stylesheets/toastr.min.css" />
+-->
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,500,300,700' rel='stylesheet' type='text/css'>
+        
+        <!--[if lt IE 9]>
+          <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+        
+    </head>
+    <body>
+    
+    <div id="wrap">
+    
+    <header class="navbar navbar-bright navbar-fixed-top" role="banner" data-spy="affix" data-offset-top="80">
+      <div class="container">
+        <div class="navbar-header">
+<!--
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+-->
+          <a class="navbar-brand" id="brand" href="/" title="">med<span style="color:#f9f9f9;font-weight:200;">Reach</span></a>
+        </div>
+        <nav class="collapse navbar-collapse" role="navigation" id="navbar">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="" rel="nofollow" target="ext">My medReach</a></li>
+                <li><a href="/about" rel="nofollow" >About</a></li>
+                <li><a id="btnAbout" href="{{ url|safe }}">{{ url_linktext }}</a></li>
+            </ul>
+        </nav>
+      </div>
+    </header>
+    
+    
+    <div id="masthead">  
+      <div class="container">
+            <div class="col-sm-5">
+                <h1>medReach<p class="lead"><span style="color:#CCFF33;">Reaching the </span>Need</p></h1>
+              <p style="font-style:italic; font-size:1.2em; line-height: 1.2em">"Verily I say unto you, Inasmuch as ye have done it unto one of the least of these my brethren, ye have done it unto me."</p>
+              </div>
+            <div class="col-sm-5">
+                <!-- ad space -->
+                <div class="pull-right well well-lg"> 
+                    <img src="https://s3.amazonaws.com/glengoffin/uploads/engeye-health-clinic-in-uganda.jpg" height="260" width="400">
+                </div>
+              </div>
+            </div>
+      </div>
+    
+    <div class="container" >
+        <div class="col-md-8">
+            <h2>Welcome to medReach</h2><p class="about-text">The social media platform that brings the 3rd world exam room to you! medReach is a non-profit organization founded on a principle that  those who have want to give, and those that receive will give back.  Your medical knowledge can go farther than you think!</p>
+            <br>
+            <p>Here’s how it works:</p>
+            <ol>
+                <li>Requestors of medical advice provide pictures and context of the patient’s condition.</li>
+                <li>Multiple users weigh in on treatments, standards of care, resolutions.</li>
+                <li>The requestor receives the comments weighted by relevance and source to care for the patient</li>
+            </ol>
+            <p>You will be asked to create a user profile and provide your medical license number.  This will help us understand who is providing feedback so that the information is weighted correctly.  But Don’t Worry; you are anonymous in the system!  All users only see your identify as “Credentials / Medical Specialty” (Ex:  Physician / Family Practice) in order to ensure anonymity.  We intend to crowdsource your advice with others to ensure quality.</p>
+            <p>All advice from multiple users can be agreed to, added to, or disagreed with so that the advice is weighted by source towards the most agreed upon standard of care for the patient.  The requestor provides feedback on the advice in conjunction with his/her own 3rd world context and summarizes the action plan decided upon.  As your advice becomes tied to treatment plans, you anonymously gain a positive reputation in the system weighting your advice even higher for next time.</p>
+            <p>We’ve kept the user profiles open so that requestors can be contributors and contributors can be requestors.  Requestors are required to resolve each case before opening a new request in order to drive the reputation process and provide users with feedback and closure on each case. </p>
+            <p>Ultimately, medReach is designed to be a user friendly, social media, crowdsourced repository of shared knowledge for individual cases that will drive positive medical outcomes in the places that need it most.  Thanks for giving back!!!</p>
+            <a href="/" id="anchor">Ready to get started?</a>
+        </div>
+      </div>
+    </div>
+        
+  </body>
+</html>
+{% endautoescape %}

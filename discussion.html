@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <base target="_self">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+        <title>medReach</title>
+        <meta name="google-site-verification" content="3YZMYT6XcVJlav0ZKb7MQrzjnRGApJS8FOsrG4fPrXo" />
+
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,500,300,700' rel='stylesheet' type='text/css'>
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+        
+        <!--[if lt IE 9]>
+          <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+        
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+
+        <style>
+        .icon-vote {
+            height:32px;
+            width:32px;
+            border: none;
+            cursor: pointer;
+        /*    color:white;*/
+            background-color: Transparent;
+            position:relative;
+        }
+        .inline {
+          display: inline;
+        }
+
+        .fileUpload {
+        }
+        .fileUpload input.upload {
+/*            position: absolute;*/
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=1);
+        }					
+/*
+        
+@media all and (max-width:400px){
+.navbar.navbar-default.navbar-fixed-top {
+    position: relative;
+  }
+}
+*/
+        </style>
+
+    </head>
+    <body>
+
+<!--    <div id="wrap">-->
+
+    <nav class="navbar navbar-bright navbar-fixed-top" role="banner">
+      <div class="container">
+        <div class="navbar-header">
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        <a class="navbar-brand" id="brand" href="/" title="">med<span style="color:#f9f9f9;font-weight:200;">Reach</span></a>
+        </div>
+          <div class="collapse navbar-collapse">
+            <form class="navbar-form navbar-right" role="search">
+                <div class="form-group">
+                  <input type="text" class="form-control input-sm" placeholder="Search">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/" rel="nofollow">Home</a></li>
+                <li><a href="/settings" rel="nofollow">My medReach</a></li>
+                <li><a href="/about" rel="nofollow" >About</a></li>
+                <li><a id="btnAbout" href="{{ url|safe }}">{{ url_linktext }}&nbsp;&nbsp;</a></li>
+            </ul>
+          </div>
+      </div>
+    </nav>
+
+
+    <div id="masthead">
+      <div class="container">
+            <div class="col-xs-12">
+              <img src="https://s3.amazonaws.com/glengoffin/uploads/engeye-health-clinic-in-uganda.jpg" style="padding-top:50px; max-height:260px; max-width:100%; overflow:hidden; float:right;">
+              <h1>medReach<p class="lead"><span style="color:#CCFF33;">Reaching the </span>Need</p></h1>
+              <p style="font-style:italic; font-size:1.2em; line-height: 1.2em;">"Verily I say unto you, Inasmuch as ye have done it unto one of the least of these my brethren, ye have done it unto me."</p>
+            </div>
+        </div>
+      </div>
+
+    <div class="container" >
+        <div class="col-md-8">
+            
+        <!-- Present the topic header -->
+        <div ><p class="discussion-title">{{ discussion_title }}</p><p class="discussion-title3" style="font-weight:300; font-size:1em; padding-left:5px;">{{ user }}</p></div>
+        <div><blockquote><p style="color:gray; font-size: 1em; font-weight: 400;">{{discussion.content}}</p></blockquote></div>
+            
+        <!-- Present the list of opinions and sub-opinions -->
+        <table class="table table-responsive">
+        {% for list in greeting_list %}
+            {% set oloop = loop %}
+            {% for greeting in list %}
+            {% if greeting.subcomment == False or greeting.subcomment == None %}
+                <tr>
+                  <td style="width:80%;">
+            {% if greeting.author %}
+                    <p><img src="/img?img_id={{ greeting.key.urlsafe() }}">
+                    <a class="comment-owner">&nbsp;&nbsp;{{ greeting.author.email }} </a><a class="comment-title">wrote: </a></p>
+            {% else %}
+                    <p>
+                    <span class="glyphicon glyphicon-user"></span>
+<!--                    <img src="img/profile-default.jpeg" height=32 width=32/>-->
+                    Anonymous <a class="comment-title">wrote: </a></p>
+            {% endif %}
+                    <p style="font-size: .7em; font-weight: 300; line-height: .6em;">{{ greeting.date.ctime() }}</p>
+                        <p style="padding-left:10px;">{{ greeting.content }}</p>
+                    {% for photo in greeting.photos %}
+                        <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:180px; max-width:100%; border:1px solid #666;"></div>
+                    {% endfor %}
+                    <div style="display:inline-block; font-weight:300;">
+                        <form action="/vote?vote_type=up&greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" enctype="multipart/form-data" method="post"><button type="submit" id="submit" style=" border:none; background-color:Transparent;">agree <span class="fa fa-thumbs-o-up"></span> {{greeting.upvotes}}</button></form>
+                        <form action="/vote?vote_type=down&greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" enctype="multipart/form-data" method="post"><button type="submit" id="submit" style=" border:none; background-color:Transparent;">disagree  <span class="fa fa-thumbs-o-down"></span> {{greeting.downvotes}}</button></form>
+                    </div>
+                  </td>
+                  <td style="float:right;" style="width:20%;">
+                        <div class="fileUpload">
+                        <form action="/upload_img?greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" enctype="multipart/form-data" method="post">
+<!--                            <a style="position:absolute; font-size: 0.9em; font-weight:300; display:inline-block; float:right">Upload Photo</a><input type="file" onchange="this.form.submit()" name="photo" class="upload" style="width:1px;"/>-->
+                          <a style="font-size: 0.9em; font-weight:300; display:inline-block; float:right">Upload Photo</a><input type="file" onchange="this.form.submit()" name="photo" class="upload" style="width:1px;"/>
+                            </form></div>
+                        <form action="/delete?del_type=greeting&greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" method="post">
+                            <input type="submit" id="submit" value="Delete Comment" style="font-size: 0.9em; font-weight:300; display:inline-block; float:right">
+                            </form>
+                        <a id="addcmt-{{oloop.index}}" class="addcmt" data-value={{oloop.index}} style="font-size: 0.9em; font-weight:300; display:inline-block; float:right">Enter Reply</a>
+                         <form action="/sign?parent=greeting&key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}"  enctype="multipart/form-data" method="post">
+                            <textarea name="content" tabindex="2" class="commentarea-{{oloop.index}}" style="display:none;"></textarea>
+                            <input type="submit" id="submit" class="commentarea-{{oloop.index}}" value="Post Reply" style="font-size: 0.9em; font-weight:300; display:none; float:right">
+                        </form>
+
+                        <script>   
+                            // Hide the comment entry area until user clicks on it
+                            $('#addcmt-{{oloop.index}}').bind( "click", function(event) {
+                                    $(".commentarea-{{oloop.index}}").toggle();
+                                    if ($("#addcmt-{{oloop.index}}").text() == "Enter Reply") {
+                                        $("#addcmt-{{oloop.index}}").text("Remove Reply");
+                                    }
+                                    else {
+                                        $("#addcmt-{{oloop.index}}").text("Enter Reply");
+                                    }
+                                });
+                        </script>
+                    </td>
+            </tr>
+            
+            <!-- This is a reply to a comment -->
+            {% elif greeting.subcomment == True %}
+            <tr>
+<!--                <td></td>   this balances the voting column in the parent row -->
+                  <td>
+                    <div style="padding-left:50px;">  
+            {% if greeting.author %}
+                    <p><img src="/img?img_id={{ greeting.key.urlsafe() }}" height=16 width=16>
+                    <a style="font-size: .8em; font-weight: 400; line-height: 1em; padding-left: 5px;">&nbsp;&nbsp;{{ greeting.author.email }} </a><a style="font-size: .8em; font-weight: 400; line-height: 1em; padding-left: 5px;">wrote: </a></p>
+            {% else %}
+                    <p>
+                    <span class="glyphicon glyphicon-user"></span>
+                    Anonymous <a>wrote: </a></p>
+            {% endif %}
+                    <p style="font-size: .7em; font-weight: 300; line-height: .6em;">{{ greeting.date.ctime() }}</p>
+                        <p style="font-size: .8em; font-weight: 400; line-height: 1em; padding-left: 5px;">{{ greeting.content }}</p>
+                    {% for photo in greeting.photos %}
+                        <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:180px; max-width:100%; border:1px solid #666;"></div>
+                    {% endfor %}
+                  </td>
+                  <td style="float:right;">
+                      <div class="fileUpload">
+                        <form action="/upload_img?greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" enctype="multipart/form-data" method="post">
+                          <a style="font-size: 0.8em; font-weight:300; display:inline-block; float:right">Upload Photo</a><input type="file" onchange="this.form.submit()" name="photo" class="upload" style="width:1px;"/>
+                        </form>
+                        <form action="/delete?del_type=greeting&greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" method="post">
+                          <input type="submit" id="submit" value="Delete Comment" style="font-size: 0.8em; font-weight:300; display:inline-block; float:right">
+                        </form>
+                      </div>
+<!--                    </td>-->
+                  </td>
+            </tr> 
+            {% endif %}
+            
+            {% endfor %}  <!-- end of inner-list iterator -->
+          {% endfor %}  <!-- end of outer-list iterator-->
+            </table> 
+            
+        <hr class="line_break">  
+            
+        <p class="discussion-title2">Add Your Opinion</p>
+        <form action="/sign?parent=discussion&key={{ discussion.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}"  enctype="multipart/form-data" method="post">
+            <textarea class="style-4" name="content" rows="3" style="width:100%; padding-left: 15px;" placeholder="Add Your Opinion . . . "></textarea>
+            <div align="right"><input class="btn btn-secondary-outline" type="submit" id="submit" value="Add Opinion"></div>
+        </form>           
+        
+        
+        <div class="mr-footer-small" align="center"><p>(c) 2016 medReach</p></div>
+        </div>
+<!--    </div>-->
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    
+  </body>
+</html>
+{% endautoescape %}
