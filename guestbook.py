@@ -13,6 +13,20 @@ from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp.util import run_wsgi_app
 
+## Import smtplib for the actual sending function
+#import smtplib
+#
+## Import the email modules we'll need
+#from email.mime.multipart import MIMEMultipart
+#from email.mime.text import MIMEText
+# http://webapp-improved.appspot.com/api/webapp2_extras/appengine/auth/models.html#webapp2_extras.appengine.auth.models.User
+# webapp2_extras.appengine.auth.models.User(*args, **kwds)
+# Link to example of a general user-auth solution:
+# https://blog.abahgat.com/2013/01/07/user-authentication-with-webapp2-on-google-app-engine/
+
+from google.appengine.api import mail
+
+
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
@@ -24,6 +38,7 @@ DEFAULT_DISCUSSION_NAME = 'default_discussion'
 # Todo:  Make Owner and Author children of same parent
 # https://cloud.google.com/appengine/docs/python/users/userobjects 
 # http://blog.abahgat.com/2013/01/07/user-authentication-with-webapp2-on-google-app-engine/
+
 
 class Author(ndb.Model):
     """Sub model for representing a comment author"""
@@ -96,7 +111,7 @@ class MainPage(webapp2.RequestHandler):
             q = ndb.gql("SELECT * FROM MrUser WHERE userid = :1", user.user_id())
             mrUser = q.get()
             if not mrUser:
-                mrUser = MrUser(userid = user.user_id())
+                mrUser = MrUser(userid = user.user_id(), avatar = None)  # Put the avatar default here
                 mrUser.put()
             currentDiscussion = mrUser.currentDiscussionKey
 
@@ -145,9 +160,14 @@ class DiscussionPage(webapp2.RequestHandler):
                 index += 1               
     
         user = users.get_current_user()
+        if user:
+            q = ndb.gql("SELECT * FROM MrUser WHERE userid = :1", user.user_id())
+            mrUser = q.get()
+        else:
+            mrUser = None
 
         #Get the upload endpoint URL for the photo upload
-        upload_url = blobstore.create_upload_url('/upload_photo')
+        upload_url = blobstore.create_upload_url('/discussion?discussion_key=' + key.urlsafe())
 
         if user:
             url = users.create_logout_url(self.request.uri)
@@ -158,6 +178,7 @@ class DiscussionPage(webapp2.RequestHandler):
 
         template_values = {
             'user': user,
+            'mr_user': mrUser,
             'greeting_list': greeting_list,
             'discussion': discussion,
             'discussion_title': discussion_title,
@@ -170,15 +191,23 @@ class DiscussionPage(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 class Avatar(webapp2.RequestHandler):
-    def get(self):
-        #The image id is the greeting key
-        if  self.request.get('img_id') != None:
-            greeting_key = ndb.Key(urlsafe=self.request.get('img_id'))
+    def get(self):   
+        image_id = self.request.get('img_id')
+
+        user = users.get_current_user()        
+        
+        # The image id is the greeting key
+        if  image_id != None and image_id != 'None':
+            greeting_key = ndb.Key(urlsafe=image_id)
             greeting = greeting_key.get()
             authorId = greeting.author.identity
             
-            #This query gets the medreach user associated to the authorID which is a google userID
+            # This query gets the medreach user associated to the authorID which is a google userID
             q = ndb.gql("SELECT * FROM MrUser WHERE userid = :1", authorId)
+            mrUser = q.get()
+        elif image_id == None or image_id == 'None' and user:
+            # If there is no greeting, then use the current users's avatar
+            q = ndb.gql("SELECT * FROM MrUser WHERE userid = :1", user.user_id())
             mrUser = q.get()
         else:
             mrUser = None
@@ -204,6 +233,9 @@ class PostAvatar(webapp2.RequestHandler):
                 avatar = self.request.get('img')
                 avatar = images.resize(avatar, 32, 32)
                 mrUser.avatar = avatar
+                mrUser.put()
+            else:
+                mrUser.avatar = Null  #Null is used as a switch for the glyph
                 mrUser.put()
 
             self.redirect('/settings')
@@ -236,10 +268,12 @@ class DeleteEntity(webapp2.RequestHandler):
                 key.delete()
 
                 greetings = Greeting.query(ancestor=disc_key).fetch(100) 
-                greetings = Greeting.query(ancestor=disc_key).fetch(100) 
                 if not greetings:
-                    disc_key.delete()
-                    self.redirect('/')
+                    # If you want to automatically remove a discussion when there are
+                    # no comments left, uncomment the two lines below and remove the redirect
+#                    disc_key.delete()
+#                    self.redirect('/')
+                    self.redirect('/discussion?discussion_key=' + disc_key.urlsafe())
                 else:
                     self.redirect('/discussion?discussion_key=' + disc_key.urlsafe())
         except:
@@ -248,8 +282,14 @@ class DeleteEntity(webapp2.RequestHandler):
 class PostDiscussion(webapp2.RequestHandler):
     def post(self):
         try:
-            discussion_title = self.request.get('disc-title')
-            discussion_body = self.request.get('content')
+            if self.request.get('disc-title'):
+                discussion_title = self.request.get('disc-title')
+            else:
+                discussion_title = 'Title'
+            if self.request.get('content'):
+                discussion_body = self.request.get('content')
+            else:
+                discussion_body = 'Comment'
             discussion_category = self.request.get('medical-category')
             discussion = Discussion(title = discussion_title, upvotes=0, downvotes=0, medical_category=discussion_category, num_comments=0, content=discussion_body)
             
@@ -268,9 +308,29 @@ class PostDiscussion(webapp2.RequestHandler):
         except:
             self.error(500)
             
+class UpdateDiscussion(webapp2.RequestHandler):
+    def post(self):
+#        try:
+            discussion_key = self.request.get('discussion_key')
+            disc_key = ndb.Key(urlsafe=discussion_key)
+            discussion = disc_key.get()
+            
+            if self.request.get('content'):
+                discussion.content = self.request.get('content')
+            if self.request.get('disc-title'):
+                discussion.title = self.request.get('disc-title')
+            if self.request.get('medical-category'):
+                discussion.medical_category = self.request.get('medical-category')
+                
+            discussion.put()
+            self.redirect('/discussion?discussion_key=' + discussion.key.urlsafe())
+
+#        except:
+#            self.error(500)
+            
 class PostGreeting(webapp2.RequestHandler):
     def post(self):
-        try:
+#        try:
             discussion_key = self.request.get('discussion_key')
             disc_key = ndb.Key(urlsafe=discussion_key)
             discussion = disc_key.get()
@@ -315,15 +375,86 @@ class PostGreeting(webapp2.RequestHandler):
                     mrUser.num_comments += 1
                     mrUser.put()
                 
+                    
             # Set the content
             greeting.content = self.request.get('content')
+
+#            # Send email notification
+#            # Create message container - the correct MIME type is multipart/alternative.
+##            msg = MIMEMultipart('alternative')
+#            msg = MIMEText(greeting.content)
+#            msg['Subject'] = "Someone Responded to You on medReach"
+            sender_addr = 'glengoffin3@gmail.com'
+#            sender_addr = 'noreply@medreach.appspotmail.com'
+#            sender_addr = 'medreach-1080@appspot.gserviceaccount.com'
+#            sender_addr = 'medreach-1080@appspot.gserviceaccount.com'
+            url_link = 'http://medreach-1080.appspot.com/discussion?discussion_key=' + discussion.key.urlsafe()
+#            msg['From'] = sender
+            if discussion.owner and discussion.owner != 'anonymous':
+                recipient_addr = discussion.owner.email
+                print discussion.owner.email
+            else:
+                recipient_addr = None
+                
+#            html = """\
+#                    <html>
+#                      <head></head>
+#                      <body>
+#                        <p>Hi!<br>
+#                           %s has responded to your post titled: "%s"<br>
+#                           Here's what they said: "%s"
+#                           Visit the site %s
+#                        </p>
+#                      </body>
+#                    </html>
+#                    """ % (greeting.author.email, discussion.title, greeting.content, url_link)
+#            
+#            text = ("""%s has responded to your post titled, " %s "  \nHere's what they said: " %s "  \nVisit the site %s.
+#                    """ % (greeting.author.email, discussion.title, greeting.content, url_link))
+
+                
+#            msg['To'] = recipient
+#
+#            # Send the message via our own SMTP server, but don't include the
+#            # envelope header.
+#            try:
+#                s = smtplib.SMTP('localhost')
+#                s.sendmail(sender, recipient, msg.as_string())
+#                s.quit()
+#            except Exception, e: 
+#                print e
+#                print 'ERROR: Unable to send email'
+            if not user or user.user_id() == recipient_addr or recipient_addr == None:
+                print 'no email'
+            else:
+                try:    
+                    mail.send_mail(sender=sender_addr,
+                                  to=recipient_addr,
+                                  subject="%s Replied to You on MedReach" % greeting.author.email,
+                                  body="""%s has responded to your post titled, "%s"  \nHere's what they said: "%s"  \nVisit the site %s.
+                                        """ % (greeting.author.email, discussion.title, greeting.content, url_link))
+                except Exception, e:
+                    print e
+                    print 'Error: Unable to send email'
+#            """
+#            Dear Albert:
+#
+#            Your example.com account has been approved.  You can now visit
+#            http://www.example.com/ and sign in using your Google Account to
+#            access new features.
+#
+#            Please let us know if you have any questions.
+#
+#            The example.com Team
+#            """
+                
 
             greeting.put()
             discussion.put()  # Updates to num_comments needed to be posted
 
             self.redirect('/discussion?discussion_key=' + discussion.key.urlsafe())
-        except:
-            self.error(500)
+#        except:
+#            self.error(500)
 
 #Todo:  Change this to GetPhoto()
 class Photo(webapp2.RequestHandler):
@@ -356,7 +487,7 @@ class PostPhoto(webapp2.RequestHandler):
             #Add photo to greeting entity
             if self.request.get('photo'):
                 photo = self.request.get('photo')
-                photo = images.resize(photo, 260, 320)
+                photo = images.resize(photo, width=400)
                 greeting.photos.append(photo)
             
                 #Add smaller version of photo to discussion gallery
@@ -445,6 +576,7 @@ class Vote(webapp2.RequestHandler):
 #            self.error(500)
 
 
+
 class AboutPage(webapp2.RequestHandler):
     def get(self):
 
@@ -456,6 +588,7 @@ class SettingsPage(webapp2.RequestHandler):
 
         user = users.get_current_user()
         
+        # Find the mrUser record associated with this google userID
         if user:
             q = ndb.gql("SELECT * FROM MrUser WHERE userid = :1", user.user_id())
             mrUser = q.get() 
@@ -495,6 +628,7 @@ app = webapp2.WSGIApplication([
     ('/upload_img', PostPhoto),
     ('/photo', Photo),
     ('/post_new', PostDiscussion),
+    ('/update', UpdateDiscussion),
     ('/sign', PostGreeting),
     ('/delete', DeleteEntity),
     ('/vote', Vote),

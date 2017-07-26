@@ -16,6 +16,7 @@ handlers:
 
 - url: /.*
   script: guestbook.app
+#  login: required
 
 libraries:
 - name: webapp2

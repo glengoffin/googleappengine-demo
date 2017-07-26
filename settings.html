@@ -31,6 +31,8 @@
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
         
         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        
+<!--
         <script>
         $(document).ready(function(){
             $("#upload_link").on('click', function(e){
@@ -39,10 +41,17 @@
             });
         });
         </script>
-<style>
-    #upload{
-    display:none
-}
+-->
+        <style>
+        #upload{
+        display:none
+        }
+        .fileUpload input.upload {
+            position: absolute;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=1);
+        }	
         </style>
  
     </head>
@@ -85,12 +94,18 @@
             {% if user and user.user_id() %}
                 <h2><a>{{ user.nickname() }}</a></h2>
                 <br>
-                <div>
-                    <form action="/upload_avatar"  enctype="multipart/form-data" method="post">
-                        <input class="btn btn-secondary-outline" id="upload" type="file" name="img"/><a href="" id="upload_link"><h3>Select a Photo to Upload</h3></a>
-                        <input class="btn btn-secondary-outline" type="submit" id="upload_link" value="Upload">
+
+                <div class="fileUpload">
+                    <form action="/upload_avatar" enctype="multipart/form-data" method="post">
+                        <button class="btn btn-primary btn-md" style="float:left">Upload a Profile Pic</button>
+                        <input type="file" onchange="this.form.submit()" class="upload" name="img" style="float:left; width:1px;"/>
                     </form>
                 </div>
+                
+                <br><br>
+                
+                <!-- Todo:  Add display of photo here -->
+                <img src="/img?img_id=None"> 
                 
                 <hr class="line-break">
                 <div>
@@ -111,12 +126,10 @@
                 <p>Please login to access your account settings.</p>
             {% endif %}
             </div>
-          
-        <div>
-        </div>
             
         </div>
     </div>
+
         
   </body>
 </html>

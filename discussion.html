@@ -18,10 +18,11 @@
         <!--[if lt IE 9]>
           <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
-
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+        <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src='js/jquery.zoom.min.js'></script>
         
-        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<!--        <script src="//code.jquery.com/jquery-1.10.2.js"></script>-->
 
         <style>
         .icon-vote {
@@ -29,15 +30,9 @@
             width:32px;
             border: none;
             cursor: pointer;
-        /*    color:white;*/
+            /*    color:white;*/
             background-color: Transparent;
             position:relative;
-        }
-        .inline {
-          display: inline;
-        }
-
-        .fileUpload {
         }
         .fileUpload input.upload {
 /*            position: absolute;*/
@@ -47,13 +42,49 @@
         }					
 /*
         
-@media all and (max-width:400px){
-.navbar.navbar-default.navbar-fixed-top {
-    position: relative;
-  }
-}
-*/
-        </style>
+    @media all and (max-width:400px){
+    .navbar.navbar-default.navbar-fixed-top {
+        position: relative;
+      }
+    }
+    */
+    /* This is for the editing of the topic text */
+        section div {
+          padding: 1em;
+          background: #E6E6E6;
+          border-radius: 3px;
+          /*box-shadow: 0 1px 5px rgba(0,0,0,0.15) inset;*/
+          outline: none;
+          border: 2px solid transparent;
+        }
+
+        section div:focus {
+          background: #FFF;
+          border-color: #91979d;
+        }       
+
+		/* these styles are for the demo, but are not required for the plugin */
+		.zoom {
+			display:inline-block;
+			position: relative;
+		}
+		
+		/* magnifying glass icon */
+		.zoom:after {
+			content:'';
+			display:block; 
+			width:33px; 
+			height:33px; 
+			position:absolute; 
+			top:0;
+			right:0;
+			background:url(icon.png);
+		}
+		.zoom img {
+			display: block;
+		}
+		.zoom img::selection { background-color: transparent; }
+    </style>
 
     </head>
     <body>
@@ -72,7 +103,7 @@
         <a class="navbar-brand" id="brand" href="/" title="">med<span style="color:#f9f9f9;font-weight:200;">Reach</span></a>
         </div>
           <div class="collapse navbar-collapse">
-            <form class="navbar-form navbar-right" role="search">
+            <form action="/" class="navbar-form navbar-right" role="search">
                 <div class="form-group">
                   <input type="text" class="form-control input-sm" placeholder="Search">
                 </div>
@@ -91,7 +122,7 @@
 
     <div id="masthead">
       <div class="container">
-            <div class="col-xs-12">
+            <div class="col-md-8">
               <img src="https://s3.amazonaws.com/glengoffin/uploads/engeye-health-clinic-in-uganda.jpg" style="padding-top:50px; max-height:260px; max-width:100%; overflow:hidden; float:right;">
               <h1>medReach<p class="lead"><span style="color:#CCFF33;">Reaching the </span>Need</p></h1>
               <p style="font-style:italic; font-size:1.2em; line-height: 1.2em;">"Verily I say unto you, Inasmuch as ye have done it unto one of the least of these my brethren, ye have done it unto me."</p>
@@ -103,8 +134,12 @@
         <div class="col-md-8">
             
         <!-- Present the topic header -->
-        <div ><p class="discussion-title">{{ discussion_title }}</p><p class="discussion-title3" style="font-weight:300; font-size:1em; padding-left:5px;">{{ user }}</p></div>
-        <div><blockquote><p style="color:gray; font-size: 1em; font-weight: 400;">{{discussion.content}}</p></blockquote></div>
+        <div ><p class="discussion-title">{{ discussion_title }}</p><p class="discussion-title3" style="font-weight:300; font-size:1em; padding-left:5px;">{{ discussion.owner.email }}</p></div>
+        
+        <!-- Insert the discussion here through javascript so that it is editable -->
+        <div class="update-form"></div>
+            
+        <br>
             
         <!-- Present the list of opinions and sub-opinions -->
         <table class="table table-responsive">
@@ -115,23 +150,36 @@
                 <tr>
                   <td style="width:80%;">
             {% if greeting.author %}
-                    <p><img src="/img?img_id={{ greeting.key.urlsafe() }}">
+                    <p>
+                        {% if mr_user.avatar == None or mr_user.avatar == "" %}
+                        <span class="glyphicon glyphicon-user"></span>
+                        {% else %}
+                        <img src="/img?img_id={{ greeting.key.urlsafe() }}">
+                        {% endif %}
                     <a class="comment-owner">&nbsp;&nbsp;{{ greeting.author.email }} </a><a class="comment-title">wrote: </a></p>
             {% else %}
                     <p>
                     <span class="glyphicon glyphicon-user"></span>
-<!--                    <img src="img/profile-default.jpeg" height=32 width=32/>-->
                     Anonymous <a class="comment-title">wrote: </a></p>
             {% endif %}
                     <p style="font-size: .7em; font-weight: 300; line-height: .6em;">{{ greeting.date.ctime() }}</p>
                         <p style="padding-left:10px;">{{ greeting.content }}</p>
                     {% for photo in greeting.photos %}
-                        <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:180px; max-width:100%; border:1px solid #666;"></div>
+<!--                      <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><a href="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" data-lightbox="{{ (10 * oloop.index) + loop.index }}"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:200px; max-width:100%; border:1px solid #666;"></a></div>-->
+                      <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><a href="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}"><span class="zoom" id="zoomable-{{ (10 * oloop.index) + loop.index }}"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:200px; max-width:100%; border:1px solid #666;"></span></a></div>
+
+                        <script>   
+                        (function($) {
+//                            $(document).ready(function(){
+                                $('#zoomable-{{ (10 * oloop.index) + loop.index }}').zoom();
+//                            });
+                        })(jQuery);
+                        </script>
                     {% endfor %}
-                    <div style="display:inline-block; font-weight:300;">
+                    <span style="font-size: .9em; font-weight:300;">
                         <form action="/vote?vote_type=up&greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" enctype="multipart/form-data" method="post"><button type="submit" id="submit" style=" border:none; background-color:Transparent;">agree <span class="fa fa-thumbs-o-up"></span> {{greeting.upvotes}}</button></form>
                         <form action="/vote?vote_type=down&greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" enctype="multipart/form-data" method="post"><button type="submit" id="submit" style=" border:none; background-color:Transparent;">disagree  <span class="fa fa-thumbs-o-down"></span> {{greeting.downvotes}}</button></form>
-                    </div>
+                    </span>
                   </td>
                   <td style="float:right;" style="width:20%;">
                         <div class="fileUpload">
@@ -149,6 +197,9 @@
                         </form>
 
                         <script>   
+                        (function($) {
+                            // You pass-in jQuery and then alias it with the $-sign
+                            // So your internal code doesn't change
                             // Hide the comment entry area until user clicks on it
                             $('#addcmt-{{oloop.index}}').bind( "click", function(event) {
                                     $(".commentarea-{{oloop.index}}").toggle();
@@ -159,6 +210,7 @@
                                         $("#addcmt-{{oloop.index}}").text("Enter Reply");
                                     }
                                 });
+                        })(jQuery);
                         </script>
                     </td>
             </tr>
@@ -170,7 +222,12 @@
                   <td>
                     <div style="padding-left:50px;">  
             {% if greeting.author %}
-                    <p><img src="/img?img_id={{ greeting.key.urlsafe() }}" height=16 width=16>
+                    <p>
+                        {% if mr_user.avatar == None %}
+                        <span class="glyphicon glyphicon-user"></span>
+                        {% else %}
+                        <img src="/img?img_id={{ greeting.key.urlsafe() }}">
+                        {% endif %}
                     <a style="font-size: .8em; font-weight: 400; line-height: 1em; padding-left: 5px;">&nbsp;&nbsp;{{ greeting.author.email }} </a><a style="font-size: .8em; font-weight: 400; line-height: 1em; padding-left: 5px;">wrote: </a></p>
             {% else %}
                     <p>
@@ -180,8 +237,18 @@
                     <p style="font-size: .7em; font-weight: 300; line-height: .6em;">{{ greeting.date.ctime() }}</p>
                         <p style="font-size: .8em; font-weight: 400; line-height: 1em; padding-left: 5px;">{{ greeting.content }}</p>
                     {% for photo in greeting.photos %}
-                        <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:180px; max-width:100%; border:1px solid #666;"></div>
+<!--                      <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><a href="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:200px; max-width:100%; border:1px solid #666;"></a></div>-->
+                      <div style="float:right; padding-right: 2px; padding-bottom: 2px;"><a href="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}"><span class="zoom" id="zoomable2-{{ (10 * oloop.index) + loop.index }}"><img src="/photo?img_id={{ greeting.key.urlsafe() }}&loop_index={{ loop.index }}" style="max-height:200px; max-width:100%; border:1px solid #666;"></span></a></div>
+
+                        <script>   
+                        (function($) {
+//                            $(document).ready(function(){
+                                $('#zoomable2-{{ (10 * oloop.index) + loop.index }}').zoom();
+//                            });
+                        })(jQuery);
+                        </script>
                     {% endfor %}
+                      </div>    
                   </td>
                   <td style="float:right;">
                       <div class="fileUpload">
@@ -189,7 +256,7 @@
                           <a style="font-size: 0.8em; font-weight:300; display:inline-block; float:right">Upload Photo</a><input type="file" onchange="this.form.submit()" name="photo" class="upload" style="width:1px;"/>
                         </form>
                         <form action="/delete?del_type=greeting&greeting_key={{ greeting.key.urlsafe() }}&discussion_key={{ discussion.key.urlsafe() }}" method="post">
-                          <input type="submit" id="submit" value="Delete Comment" style="font-size: 0.8em; font-weight:300; display:inline-block; float:right">
+                          <input type="submit" id="submit" value="Delete Comment" style="font-size: 0.8em; font-weight:300; display:inline-block; float:right;">
                         </form>
                       </div>
 <!--                    </td>-->
@@ -212,11 +279,21 @@
         
         <div class="mr-footer-small" align="center"><p>(c) 2016 medReach</p></div>
         </div>
-<!--    </div>-->
+    </div>
 
-    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-    
+    <!--    This is for editing the description by clicking on the text itself-->
+    <script>
+    (function($) {
+        // Insert the normal discussion text 
+        $('div.update-form').replaceWith("<div id=\x22update-form\x22><blockquote><p id=\x22update-form\x22 style=\x22color:gray; font-size: 1em; font-weight: 400;\x22>{{discussion.content}}</p></blockquote><a style=\x22font-size: 0.9em; font-weight:300; display:inline-block; float:right\x22>Click Text to Edit</a></div>");
+        // Clicking on the discussion text inserts the update form
+        $('p#update-form').click(function() {
+            $('div#update-form').replaceWith("<form action=\x22/update?discussion_key={{ discussion.key.urlsafe() }}\x22  enctype=\x22multipart/form-data\x22 method=\x22post\x22><input type=\x22text\x22 class=\x22style-4\x22 name=\x22disc-title\x22 rows=\x221\x22 style=\x22width:100%; padding-left: 15px;\x22 placeholder=\x22{{discussion.title}}\x22><p></p><textarea class=\x22style-4\x22 name=\x22content\x22 rows=\x222\x22 style=\x22width:100%; padding-left: 15px; border:None;\x22 placeholder=\x22{{discussion.content}}\x22>{{discussion.content}}</textarea><div align=\x22right\x22><select name=\x22medical-category\x22><option value=\x22pediatrics\x22>Pediatrics</option><option value=\x22obstetrics\x22>Obstetrics</option><option value=\x22cardiology\x22>Cardiology</option><option value=\x22neurology\x22>Neurology</option><option value=\x22dentistry\x22>Dentistry</option><option value=\x22opthamology\x22>Opthamology</option><option value=\x22orthopedics\x22>Orthopedics</option></select><input class=\x22btn btn-secondary-outline\x22 type=\x22submit\x22 id=\x22submit\x22 value=\x22Update\x22></div></form>");
+        }); 
+    })(jQuery);
+    </script>
+
   </body>
 </html>
 {% endautoescape %}

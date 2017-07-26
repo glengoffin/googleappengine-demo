@@ -74,7 +74,7 @@
         </div>
           <div class="collapse navbar-collapse">
 <!--        <nav class="collapse navbar-collapse" role="navigation" id="navbar">-->
-            <form class="navbar-form navbar-right" role="search">
+            <form action="/" class="navbar-form navbar-right" role="search">
                 <div class="form-group">
                   <input type="text" class="form-control input-sm" placeholder="Search">
                 </div>
@@ -109,7 +109,7 @@
         <div class="col-md-8">
             
             {% if user and user.user_id() %}
-                <h2>Welcome to medReach, &nbsp;<a>{{ user.nickname() }}</a></h2>
+                <h2>Welcome to medReach &nbsp;<a>{{ user.nickname() }}</a></h2>
             {% else %}
                 <h2>Welcome to medReach</h2>
             {% endif %}
@@ -129,7 +129,7 @@
         <form action="/post_new"  enctype="multipart/form-data" method="post">
             <input type="text" class="style-4" name="disc-title" rows="1" style="width:100%; padding-left: 15px;" placeholder="Title">
             <p> </p>
-            <textarea class="style-4" name="content" rows="2" style="width:100%; padding-left: 15px;" placeholder="Description"></textarea>
+            <textarea class="style-4" name="content" rows="2" style="border:none; width:100%; padding-left: 15px;" placeholder="Description"></textarea>
             <div align="right">
             <select name="medical-category">
               <option value="pediatrics">Pediatrics</option>
@@ -141,6 +141,7 @@
               <option value="orthopedics">Orthopedics</option>
             </select><input class="btn btn-secondary-outline" type="submit" id="submit" value="Add Request"></div>
         </form>
+
             
         <hr class="line_break">
             
